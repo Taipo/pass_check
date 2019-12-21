@@ -1,6 +1,7 @@
 <?php
 
 class PasswordFilter {
+    
     private const PASS_MIN_LENGTH = 12;
     
     public static function hard_pass_check( string $pass ): bool {
@@ -9,7 +10,7 @@ class PasswordFilter {
         $_blacklist = self::get_pw_blacklist();
         
         # set as uppercase
-        $pass = strtoupper( $pass );
+        $pass = mb_strtoupper( $pass );
         
         # initialise $pass_strength
         $pass_strength = true;
@@ -29,7 +30,7 @@ class PasswordFilter {
     
         // Test the first 6 characters for digits. If you want to use only numbers as a password you will need a number longer than
         // 23 digits in length as a strong password log2( 10^24 ) = 79.72-bits i.e 1345 8954 6326 7594 3561 7659
-        if ( is_numeric( substr( $t_pass, 0, 6 ) ) && ( strlen( $t_pass ) < 24 ) ) $pass_strength = false;
+        if ( is_numeric( mb_substr( $t_pass, 0, 6 ) ) && ( mb_strlen( $t_pass ) < 24 ) ) $pass_strength = false;
         
         # set an alphanumeric test $t_an_pass
         $t_an_pass = self::set_alphanum_pw( $t_pass );
@@ -64,11 +65,11 @@ class PasswordFilter {
         return preg_replace( "/[^a-zA-Z0-9]/i", "", $pass );
     }
     private function format_pw( string $pass, int $min ): string {
-        return ( strlen( $pass ) > $min ) ? substr( $pass, 0, $min ) : $pass; 
+        return ( mb_strlen( $pass ) > $min ) ? mb_substr( $pass, 0, $min ) : $pass; 
     }
     private function is_pw_looped( string $pass ): bool {
         preg_match_all( '/(.)\1+/', $pass, $matches );
-        $result = array_combine( $matches[ 0 ], array_map( 'strlen', $matches[ 0 ] ) );
+        $result = array_combine( $matches[ 0 ], array_map( 'mb_strlen', $matches[ 0 ] ) );
         if ( !empty( $result) ) {
             $r_chars = array_values( array_count_values( array_values( $result ) ) );
             if ( count( $r_chars ) == 1 ) {
@@ -95,12 +96,12 @@ class PasswordFilter {
                file_get_contents( __DIR__ . '\password-blacklist.txt' ) ) );
     }
     private static function check_duplicate_phrases( string $pass, int $count ): bool {
-        $pass_len = strlen( $pass );
+        $pass_len = mb_strlen( $pass );
         $t_array = array();
         $div = $pass_len - $count;
         # check for 3 char phrases, or occurences of 4 repeat chars
         for( $x = 0; $x <= $div; $x++ ) {
-            $t_array[] = substr( $pass, $x, $count );
+            $t_array[] = mb_substr( $pass, $x, $count );
         }
         $f_array = array_unique( $t_array );
         if ( count( $t_array ) > count( $f_array ) ) {
