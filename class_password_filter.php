@@ -1,7 +1,7 @@
 <?php
 
 class PasswordFilter {
-    
+    private const PASS_MIN_LENGTH = 12;
     public static function hard_pass_check( $pass ) {
         
         $pass_strength = true;
@@ -34,9 +34,9 @@ class PasswordFilter {
         $min_pass_len = ( false !== ctype_alnum( $t_pass ) )? 14 : 13 ; // log2( 62^14 ) = 83.35-bits, log2( 95^13 ) = 85.40-bits
         
         // This password is weak. A 14 character alpha numeric pw would take 196.35 years to break ((62^14 / 2.0) / 1e15 / 31579200)
-        // at 1000 parralel instances of 1 trillion hashes per second, whereas a 13 character password would take 3 years to crack,
+        // at 1000 parallel instances of 1 trillion hashes per second, whereas a 13 character password would take 3 years to crack,
         // and a 12 character password 18 days to crack
-        if ( strlen( $pass ) < 12 ) $pass_strength = false;
+        if ( strlen( $pass ) <= self::PASS_MIN_LENGTH ) $pass_strength = false;
     
         // Test the first 6 characters for digits. If you want to use only numbers as a password you will need a number longer than
         // 23 digits in length as a strong password log2( 10^24 ) = 79.72-bits i.e 1345 8954 6326 7594 3561 7659
@@ -46,16 +46,16 @@ class PasswordFilter {
         $t_an_pass = preg_replace( "/[^a-zA-Z0-9]/i", "", $t_pass );
      
         # prevent the use of lazy passwords within the first $min_pass_len characters of a password
-        # passwords longer than $min_pass_len characters will at least have 83-bits of good password
-        $t_pass = ( strlen( $t_pass ) > $min_pass_len ) ? substr( $t_pass, 0, $min_pass_len ) : $t_pass;
+        # passwords longer than $min_pass_len characters will at least have 83-bits of useable password entropy
+        $t_pass_min = ( strlen( $t_pass ) > $min_pass_len ) ? substr( $t_pass, 0, $min_pass_len ) : $t_pass;
         
         # also test the aphanum within a password as well.
         $t_an_pass = ( strlen( $t_an_pass ) > $min_pass_len ) ? substr( $t_an_pass, 0, $min_pass_len ) : $t_an_pass; 
         
-        // prevent the use of more than 1 set of reoccuring characters within the first $min_pass_len
+        // prevent the use of more than 1 pair of reoccuring characters within the first $min_pass_len
         // characters in a password. ex: vv passes, as does vvv, vvdphh fails because of vv and hh,
         // vvvvdphdh fails because of two sets of vv
-        preg_match_all( '/(.)\1+/', $t_pass, $matches );
+        preg_match_all( '/(.)\1+/', $t_pass_min, $matches );
         $result = array_combine( $matches[ 0 ], array_map( 'strlen', $matches[ 0 ] ) );
         if ( !empty( $result) ) {
             $r_chars = array_values( array_count_values( array_values( $result ) ) );
@@ -68,11 +68,11 @@ class PasswordFilter {
         
         // prevent the use of any reoccuring sets of 3 or 4 characters within the first $min_pass_len
         // characters in a password
-        if ( false !== self::check_duplicate_phrases( $t_pass, 3 ) ) $pass_strength = false;
-        if ( false !== self::check_duplicate_phrases( $t_pass, 4 ) ) $pass_strength = false;
+        if ( false !== self::check_duplicate_phrases( $t_pass_min, 3 ) ) $pass_strength = false;
+        if ( false !== self::check_duplicate_phrases( $t_pass_min, 4 ) ) $pass_strength = false;
         
         foreach ( $_blacklist as $badpass ) {
-            if ( false !== strpos( $t_pass, $badpass ) || false !== strpos( $t_an_pass, $badpass ) ) {
+            if ( false !== strpos( $t_pass_min, $badpass ) || false !== strpos( $t_an_pass, $badpass ) ) {
                 $pass_strength = false;
                 break;
             }
@@ -97,4 +97,3 @@ class PasswordFilter {
         return false;    
     }
 }
-?>
