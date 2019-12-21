@@ -25,7 +25,7 @@ class PasswordFilter {
                              'sunshine',
                              'test',
                              'zinch',
-                             'zxc' );
+                             'zxcvb' );
         
         # prepare the pass
         $t_pass = strtolower( urldecode( trim( str_replace( ' ', '', $pass ) ) ) );
