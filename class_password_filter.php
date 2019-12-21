@@ -73,7 +73,7 @@ class PasswordFilter {
         
         foreach ( $_blacklist as $badpass ) {
             if ( false !== strpos( $t_pass, $badpass ) || false !== strpos( $t_an_pass, $badpass ) ) {
-                $pass_strength = true;
+                $pass_strength = false;
                 break;
             }
         }
