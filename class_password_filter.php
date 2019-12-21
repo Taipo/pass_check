@@ -45,7 +45,9 @@ class PasswordFilter {
         // prevent the use of more than 1 pair of reoccuring characters within the first $min_pass_len
         // characters in a password. ex: vv passes, as does vvv, vvdphh fails because of vv and hh,
         // vvvvdphdh fails because of two sets of vv
-        self::is_pw_looped( $t_pass_min );
+        if ( false !== self::is_pw_looped( $t_pass_min ) ) {
+            $pass_strength = false;
+        }
         
         // prevent the use of any reoccuring sets of 3 or 4 characters within the first $min_pass_len
         // characters in a password
