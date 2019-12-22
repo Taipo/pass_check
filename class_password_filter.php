@@ -136,6 +136,7 @@ class PasswordFilter {
             return $return_array;
         }
     }
+    
     private static function check_duplicate_phrases( string $pass, $message = null, string $propertyPath = null ): array {
         for( $n = 3; $n <= 4; $n++ ) {
             $pass_len = \mb_strlen( $pass );
@@ -164,14 +165,15 @@ class PasswordFilter {
     
 	private static function pass_assertion( $pass, $pass_1, $pass_2, $obvious_pwds ): object {
         $results = array();
-        $results[ 'diceware_test' ] = self::is_diceware( $pass );
-		$results[ 'string_test' ]   = self::is_a_string( $pass, '' );
-        $results[ 'pass_length' ]   = self::string_length( $pass, '' );
-        $results[ 'is_numeric' ]    = self::is_a_number( $pass, '' );
-        $results[ 'pw_loop' ]       = self::is_pw_looped( $pass );
-        $results[ 'dup_phrases' ]   = self::check_duplicate_phrases( $pass );
-        $results[ 'is_obvious' ]    = self::is_pw_obvious( $obvious_pwds, $pass_1, $pass_2 );
-        $results                    = ( object ) $results;
+        $results[ 'diceware_test' ]     = self::is_diceware( $pass );
+		$results[ 'string_test' ]       = self::is_a_string( $pass, '' );
+        $results[ 'pass_length' ]       = self::string_length( $pass, '' );
+        $results[ 'is_numeric' ]        = self::is_a_number( $pass, '' );
+        $results[ 'is_alphanumeric' ]   = self::is_alphanumeric( $pass, '' );
+        $results[ 'pw_loop' ]           = self::is_pw_looped( $pass );
+        $results[ 'dup_phrases' ]       = self::check_duplicate_phrases( $pass );
+        $results[ 'is_obvious' ]        = self::is_pw_obvious( $obvious_pwds, $pass_1, $pass_2 );
+        $results                        = ( object ) $results;
         return $results;
 	}
     public static function string_length( $value, $message = null, string $propertyPath = null ): array {
@@ -187,6 +189,14 @@ class PasswordFilter {
         return array( 'string_length' => $str_len, 'message' => \sprintf( $message ?: 'Password is "%s" characters long',
                         $str_len
                         ) );
+    }
+    
+    public static function is_alphanumeric( $value, $message = null, string $propertyPath = null ): array {
+        if ( false === ( bool ) preg_match( '/[a-z]/', $value ) || false === ( bool ) preg_match( '/[A-Z]/', $value ) || false === ( bool ) preg_match( '/[0-9]/', $value ) ) {
+            return array( 'is_alphanumeric' => false, 'message' => \sprintf( $message ?: 'Password "%s" expected to contain alphanumeric characters including at least one uppercase letter', 
+                        static::string_check( $value ) ) );
+        } else return array( 'is_alphanumeric' => true, 'message' => \sprintf( $message ?: 'Password "%s" contains alphanumeric characters including at least one uppercase letter', 
+                        static::string_check( $value ) ) );
     }
     public static function is_a_number( $value, $message = null, string $propertyPath = null ): array {
         # Test the first 6 characters for digits. If you want to use only numbers as a password you will need a number longer than
