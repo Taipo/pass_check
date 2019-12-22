@@ -30,8 +30,14 @@ class PasswordFilter {
         
         # finally run the tests and return
         $final_obj = new ArrayObject( self::pass_assertion( $pass, $t_pass_min, $t_an_pass_min, $_blacklist ) );
+        
+        # get pass fail status of password
         $status = self::get_boolean( $final_obj );
+        
+        # append to the object
         $final_obj->offsetSet( 'pass_check', $status );
+        
+        #output
         if ( $output_type == 'bool' ) {
             return $status;
         } elseif ( $output_type == 'object' ) {
