@@ -17,7 +17,7 @@ class PasswordFilter {
         
         # dynamically set minimum password length
         $min_pass_len = self::set_min_pw_len( $t_pass ); // log2( 62^14 ) = 83.35-bits, log2( 95^13 ) = 85.40-bits
-
+    
         # set an alphanumeric test $t_an_pass
         $t_an_pass = self::set_alphanum_pw( $t_pass );
      
@@ -36,22 +36,21 @@ class PasswordFilter {
         
         # append to the object
         $final_obj->offsetSet( 'pass_check', $status );
-        
         #output
-        if ( $output_type == 'bool' ) {
-            return $status;
+        if ( $output_type == 'json' ) {
+            return \json_encode( $final_obj );
         } elseif ( $output_type == 'object' ) {
             return $final_obj;
         } elseif ( $output_type == 'jbool' ) {
             return \json_encode( $status );      
-        } elseif ( $output_type == '' || $output_type == 'json' ) {
-            return \json_encode( $final_obj );
+        } elseif ( $output_type == '' || $output_type == 'bool' ) {
+            return $status;
         }
     }
     private static function pass_assertions( $pass, $pass_1, $pass_2, $obvious_pwds ): object {
         $results = array();
         $results[ 'diceware_test' ]     = self::is_diceware( $pass );
-	$results[ 'string_test' ]       = self::is_a_string( $pass, '' );
+    $results[ 'string_test' ]       = self::is_a_string( $pass, '' );
         $results[ 'pass_length' ]       = self::string_length( $pass, '' );
         $results[ 'is_numeric' ]        = self::is_a_number( $pass, '' );
         $results[ 'is_alphanumeric' ]   = self::is_alphanumeric( $pass, '' );
@@ -118,7 +117,7 @@ class PasswordFilter {
             $numeralis = $ob_result->{ 'is_numeric' };
             if ( false !== $numeralis[ 'is_a_number' ]  ) return false;
             $alphanumeralis = $ob_result->{ 'is_alphanumeric' };
-            if ( false === $alphanumeralis[ 'is_alphanumeric' ]  ) return false;            
+            if ( false === $alphanumeralis[ 'is_alphanumeric' ]  ) return false;  
             $pass_loop = $ob_result->{ 'pw_loop' }; 
             if ( false !== $pass_loop[ 'is_pw_looped' ] ) return false;
             $duplication = $ob_result->{ 'dup_phrases' };
