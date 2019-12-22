@@ -50,7 +50,7 @@ class PasswordFilter {
     private static function pass_assertions( $pass, $pass_1, $pass_2, $obvious_pwds ): object {
         $results = array();
         $results[ 'diceware_test' ]     = self::is_diceware( $pass );
-    $results[ 'string_test' ]       = self::is_a_string( $pass, '' );
+        $results[ 'string_test' ]       = self::is_a_string( $pass, '' );
         $results[ 'pass_length' ]       = self::string_length( $pass, '' );
         $results[ 'is_numeric' ]        = self::is_a_number( $pass, '' );
         $results[ 'is_alphanumeric' ]   = self::is_alphanumeric( $pass, '' );
