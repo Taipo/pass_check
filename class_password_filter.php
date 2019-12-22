@@ -117,6 +117,8 @@ class PasswordFilter {
             if ( self::PASS_MIN_LENGTH > $pass_length[ 'string_length' ]  ) return false;
             $numeralis = $ob_result->{ 'is_numeric' };
             if ( false !== $numeralis[ 'is_a_number' ]  ) return false;
+            $alphanumeralis = $ob_result->{ 'is_alphanumeric' };
+            if ( false === $alphanumeralis[ 'is_alphanumeric' ]  ) return false;            
             $pass_loop = $ob_result->{ 'pw_loop' }; 
             if ( false !== $pass_loop[ 'is_pw_looped' ] ) return false;
             $duplication = $ob_result->{ 'dup_phrases' };
