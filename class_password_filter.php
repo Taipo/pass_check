@@ -31,6 +31,7 @@ class PasswordFilter {
         # finally run the tests and return
         $final_obj = new ArrayObject( self::pass_assertion( $pass, $t_pass_min, $t_an_pass_min, $_blacklist ) );
         $status = self::get_boolean( $final_obj );
+        $final_obj->offsetSet( 'pass_check', $status );
         if ( $output_type == 'bool' ) {
             return $status;
         } elseif ( $output_type == 'object' ) {
@@ -38,7 +39,6 @@ class PasswordFilter {
         } elseif ( $output_type == 'jbool' ) {
             return \json_encode( $status );      
         } elseif ( $output_type == '' || $output_type == 'json' ) {
-            $final_obj->offsetSet( 'pass_check', $status );
             return \json_encode( $final_obj );
         }
     }
