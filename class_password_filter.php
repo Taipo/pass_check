@@ -29,7 +29,7 @@ class PasswordFilter {
         $t_an_pass_min = self::format_pw( $t_an_pass, $min_pass_len );
         
         # finally run the tests and return
-        $final_obj = new ArrayObject( self::pass_assertion( $pass, $t_pass_min, $t_an_pass_min, $_blacklist ) );
+        $final_obj = new ArrayObject( self::pass_assertions( $pass, $t_pass_min, $t_an_pass_min, $_blacklist ) );
         
         # get pass fail status of password
         $status = self::get_boolean( $final_obj );
@@ -48,6 +48,19 @@ class PasswordFilter {
             return \json_encode( $final_obj );
         }
     }
+    private static function pass_assertions( $pass, $pass_1, $pass_2, $obvious_pwds ): object {
+        $results = array();
+        $results[ 'diceware_test' ]     = self::is_diceware( $pass );
+	$results[ 'string_test' ]       = self::is_a_string( $pass, '' );
+        $results[ 'pass_length' ]       = self::string_length( $pass, '' );
+        $results[ 'is_numeric' ]        = self::is_a_number( $pass, '' );
+        $results[ 'is_alphanumeric' ]   = self::is_alphanumeric( $pass, '' );
+        $results[ 'pw_loop' ]           = self::is_pw_looped( $pass );
+        $results[ 'dup_phrases' ]       = self::check_duplicate_phrases( $pass );
+        $results[ 'is_obvious' ]        = self::is_pw_obvious( $obvious_pwds, $pass_1, $pass_2 );
+        $results                        = ( object ) $results;
+        return $results;
+    }    
     private function set_min_pw_len( string $pass ): int {
         return ( false !== \ctype_alnum( $pass ) ) ? 14 : 13;
     }
@@ -169,19 +182,6 @@ class PasswordFilter {
                            $pass ) );   
     }
     
-	private static function pass_assertion( $pass, $pass_1, $pass_2, $obvious_pwds ): object {
-        $results = array();
-        $results[ 'diceware_test' ]     = self::is_diceware( $pass );
-		$results[ 'string_test' ]       = self::is_a_string( $pass, '' );
-        $results[ 'pass_length' ]       = self::string_length( $pass, '' );
-        $results[ 'is_numeric' ]        = self::is_a_number( $pass, '' );
-        $results[ 'is_alphanumeric' ]   = self::is_alphanumeric( $pass, '' );
-        $results[ 'pw_loop' ]           = self::is_pw_looped( $pass );
-        $results[ 'dup_phrases' ]       = self::check_duplicate_phrases( $pass );
-        $results[ 'is_obvious' ]        = self::is_pw_obvious( $obvious_pwds, $pass_1, $pass_2 );
-        $results                        = ( object ) $results;
-        return $results;
-	}
     public static function string_length( $value, $message = null, string $propertyPath = null ): array {
         # A 14 character alpha numeric pw would take 196.35 years to break ((62^14 / 2.0) / 1e15 / 31579200)
         # at 1000 parallel instances of 1 trillion hashes per second, whereas a 13 character password would take 3 years to crack,
