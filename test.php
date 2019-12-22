@@ -1,5 +1,6 @@
 <?php
     require_once( 'class_password_filter.php' );
     $PasswordFilter = new PasswordFilter();
-    var_dump( PasswordFilter::hard_pass_check( 'testpasswordhere' ) );
+    # choose from either bool, object or json for output type
+    var_dump( $PasswordFilter->pass_check( 'TestPasswordHere', 'json' ) );
 ?>
