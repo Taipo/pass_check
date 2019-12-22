@@ -35,6 +35,8 @@ class PasswordFilter {
             return $status;
         } elseif ( $output_type == 'object' ) {
             return $final_obj;
+        } elseif ( $output_type == 'jbool' ) {
+            return \json_encode( $status );      
         } elseif ( $output_type == '' || $output_type == 'json' ) {
             $final_obj->offsetSet( 'pass_check', $status );
             return \json_encode( $final_obj );
@@ -226,5 +228,5 @@ class PasswordFilter {
             $result = '<NULL>';
         }
         return $result;
-    }   
+    }
 }
