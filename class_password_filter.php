@@ -48,9 +48,12 @@ class PasswordFilter {
         }
     }
     private static function pass_assertions( $pass, $pass_1, $pass_2, $obvious_pwds ): object {
-        $results = array();
-        $results[ 'diceware_test' ]     = static::is_diceware( $pass );
+        $result_keys = array( 'string_test', 'diceware_test', 'pass_length', 'is_numeric', 'is_alphanumeric', 'pw_loop', 'dup_phrases', 'is_obvious' );
+        $results                        = array_fill_keys( $result_keys, '' );
+        $string_test                    = static::is_a_string( $pass, '' );
         $results[ 'string_test' ]       = static::is_a_string( $pass, '' );
+        if ( false === $string_test[ 'is_a_string' ] ) return ( object ) $results;
+        $results[ 'diceware_test' ]     = static::is_diceware( $pass );
         $results[ 'pass_length' ]       = static::string_length( $pass, '' );
         $results[ 'is_numeric' ]        = static::is_a_number( $pass, '' );
         $results[ 'is_alphanumeric' ]   = static::is_alphanumeric( $pass, '' );
@@ -70,6 +73,7 @@ class PasswordFilter {
         return ( \mb_strlen( $pass ) > $min ) ? \mb_substr( $pass, 0, $min ) : $pass; 
     }
     protected static function is_pw_looped( string $pass, $message = null, string $propertyPath = null ): array {
+        if ( !\is_string( $pass ) ) return array( 'is_pw_looped' => false, 'message' => 'Loop test found $pass was not a string' );
         \preg_match_all( '/(.)\1+/', $pass, $matches );
         $result = \array_combine( $matches[ 0 ], \array_map( 'mb_strlen', $matches[ 0 ] ) );
         if ( !empty( $result) ) {
@@ -109,6 +113,8 @@ class PasswordFilter {
     }
     private static function get_boolean( $ob_result ): bool {
             $ob_result = ( object ) \json_decode( \json_encode( $ob_result ), true );
+            $str_test = $ob_result->{ 'string_test' };
+            if ( false === $str_test[ 'is_a_string' ] ) return false;
             $diceware = $ob_result->{ 'diceware_test' };
             if ( false !== $diceware[ 'is_dw' ] && 'fail' == $diceware[ 'status' ] ) return false;
             if ( false !== $diceware[ 'is_dw' ] && 'pass' == $diceware[ 'status' ] ) return true;
@@ -127,6 +133,7 @@ class PasswordFilter {
             return true;        
     }
     protected static function is_diceware( $pass ): array {
+        if ( !\is_string( $pass ) ) return array( 'is_dw' => false, 'status' => 'fail' );
         $return_array = array( 'is_dw' => false, 'status' => 'fail', 'word_count' => 0, 'avg_len' => 0 );
         $pass_strength = 0;
         $repass = \mb_strtolower( $pass );
@@ -210,7 +217,7 @@ class PasswordFilter {
         # 23 digits in length as a strong password log2( 10^24 ) = 79.72-bits i.e 1345 8954 6326 7594 3561 7659
         if ( ( \is_numeric( \mb_substr( $value, 0, 6 ) ) && ( \mb_strlen( $value ) < 24 ) ) ) {
             return array( 'is_a_number' => true, 'message' => \sprintf( $message ?: 'Password "%s" expected to be at least alphanumeric. If you want to use only numbers as a password you will need a number longer than 23 digits in length as a strong password log2( 10^24 ) = 79.72-bits i.e 1345 8954 6326 7594 3561 7659',
-                        static::string_check( $value )
+                        $value
                         ) );
         }
         return array( 'is_a_number' => false, 'message' => '' );
