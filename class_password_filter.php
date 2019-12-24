@@ -29,7 +29,7 @@ class PasswordFilter {
         $t_an_pass_min = static::format_pw( $t_an_pass, $min_pass_len );
         
         # finally run the tests and return
-        $final_obj = new ArrayObject( self::pass_assertions( $pass, $t_pass_min, $t_an_pass_min, $_blacklist ) );
+        $final_obj = new \ArrayObject( self::pass_assertions( $pass, $t_pass_min, $t_an_pass_min, $_blacklist ) );
         
         # get pass fail status of password
         $status = static::get_boolean( $final_obj );
@@ -48,8 +48,8 @@ class PasswordFilter {
         }
     }
     private static function pass_assertions( $pass, $pass_1, $pass_2, $obvious_pwds ): object {
-        $result_keys = array( 'string_test', 'diceware_test', 'pass_length', 'is_numeric', 'is_alphanumeric', 'pw_loop', 'dup_phrases', 'is_obvious' );
-        $results                        = array_fill_keys( $result_keys, '' );
+        $result_keys                    = array( 'string_test', 'diceware_test', 'pass_length', 'is_numeric', 'is_alphanumeric', 'pw_loop', 'dup_phrases', 'is_obvious' );
+        $results                        = \array_fill_keys( $result_keys, '' );
         $string_test                    = static::is_a_string( $pass, '' );
         $results[ 'string_test' ]       = static::is_a_string( $pass, '' );
         if ( false === $string_test[ 'is_a_string' ] ) return ( object ) $results;
@@ -77,7 +77,7 @@ class PasswordFilter {
         \preg_match_all( '/(.)\1+/', $pass, $matches );
         $result = \array_combine( $matches[ 0 ], \array_map( 'mb_strlen', $matches[ 0 ] ) );
         if ( !empty( $result) ) {
-            $r_chars = \array_values( array_count_values( array_values( $result ) ) );
+            $r_chars = \array_values( \array_count_values( \array_values( $result ) ) );
             if ( \count( $r_chars ) == 1 ) {
                 if ( $r_chars[ 0 ] > 1 ) return array(
                                             'is_pw_looped' => true, 'message' => \sprintf(
@@ -93,7 +93,7 @@ class PasswordFilter {
     protected static function is_pw_obvious( array $obvious_pwds, string $pw1, string $pw2, $message = null, string $propertyPath = null ): array {
         $wordlist = array();
         foreach ( $obvious_pwds as $obvious) {
-            if ( false !== \mb_strpos( mb_strtolower( $pw1 ), \mb_strtolower( $obvious ) ) || false !== \mb_strpos( mb_strtolower( $pw2 ), \mb_strtolower( $obvious ) ) ) {
+            if ( false !== \mb_strpos( \mb_strtolower( $pw1 ), \mb_strtolower( $obvious ) ) || false !== \mb_strpos( \mb_strtolower( $pw2 ), \mb_strtolower( $obvious ) ) ) {
                 $wordlist[] = $obvious;
             }           
         }
@@ -174,7 +174,7 @@ class PasswordFilter {
                 $t_array[] = \mb_substr( $pass, $x, $n );
             }
             $f_array = \array_unique( $t_array, SORT_STRING );
-            if ( \count( $t_array ) > count( $f_array ) ) {
+            if ( \count( $t_array ) > \count( $f_array ) ) {
                 $diff = array();
                 for( $t = 0; $t < \count( $f_array ); $t++ ) {
                     if ( !\array_key_exists( $t, $f_array ) ) $diff[] = $t_array[ $t ];
@@ -206,7 +206,7 @@ class PasswordFilter {
     }
     
     protected static function is_alphanumeric( $value, $message = null, string $propertyPath = null ): array {
-        if ( false === ( bool ) preg_match( '/[a-z]/', $value ) || false === ( bool ) preg_match( '/[A-Z]/', $value ) || false === ( bool ) preg_match( '/[0-9]/', $value ) ) {
+        if ( false === ( bool ) \preg_match( '/[a-z]/', $value ) || false === ( bool ) \preg_match( '/[A-Z]/', $value ) || false === ( bool ) \preg_match( '/[0-9]/', $value ) ) {
             return array( 'is_alphanumeric' => false, 'message' => \sprintf( $message ?: 'Password "%s" expected to contain alphanumeric characters including at least one uppercase letter', 
                         static::string_check( $value ) ) );
         } else return array( 'is_alphanumeric' => true, 'message' => \sprintf( $message ?: 'Password "%s" contains alphanumeric characters including at least one uppercase letter', 
